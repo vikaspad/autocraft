@@ -1,0 +1,8 @@
+@org.junit.jupiter.api.Test
+void {{ test_method_name | default('mock_producer_sends_records') }}() {
+    org.apache.kafka.clients.producer.MockProducer<String, String> producer =
+        new org.apache.kafka.clients.producer.MockProducer<>({{ auto_complete | default('true') }}, null, null);
+    producer.send(new org.apache.kafka.clients.producer.ProducerRecord<>("{{ topic | default('demo-topic') }}", "{{ key | default('key') }}", "{{ value | default('value') }}"));
+    producer.completeNext();
+    org.assertj.core.api.Assertions.assertThat(producer.history()).hasSize({{ expected_size | default('1') }});
+}

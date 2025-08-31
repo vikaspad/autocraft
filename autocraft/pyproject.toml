@@ -1,0 +1,23 @@
+[project]
+name = "autocraft"
+version = "0.1.0"
+description = "Build dev test library"
+authors = [{ name = "Your Name", email = "you@example.com" }]
+requires-python = ">=3.10,<3.16"
+dependencies = [
+    "crewai[tools]>=0.108.0,<1.0.0"
+]
+
+[project.scripts]
+stock_picker = "autocraft.main:run"
+run_crew = "autocraft.main:run"
+train = "autocraft.main:train"
+replay = "autocraft.main:replay"
+test = "autocraft.main:test"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.crewai]
+type = "crew"

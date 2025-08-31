@@ -1,0 +1,23 @@
+@org.junit.jupiter.api.Test
+void {{ test_method_name | default('receives_text_message') }}() throws Exception {
+    javax.jms.ConnectionFactory cf = org.mockito.Mockito.mock(javax.jms.ConnectionFactory.class);
+    javax.jms.Connection conn = org.mockito.Mockito.mock(javax.jms.Connection.class);
+    javax.jms.Session session = org.mockito.Mockito.mock(javax.jms.Session.class);
+    javax.jms.Queue queue = org.mockito.Mockito.mock(javax.jms.Queue.class);
+    javax.jms.MessageConsumer mc = org.mockito.Mockito.mock(javax.jms.MessageConsumer.class);
+    javax.jms.TextMessage tm = org.mockito.Mockito.mock(javax.jms.TextMessage.class);
+
+    org.mockito.Mockito.when(cf.createConnection()).thenReturn(conn);
+    org.mockito.Mockito.when(conn.createSession(false, javax.jms.Session.AUTO_ACKNOWLEDGE)).thenReturn(session);
+    org.mockito.Mockito.when(session.createQueue("{{ queue_name | default('demo.queue') }}")).thenReturn(queue);
+    org.mockito.Mockito.when(session.createConsumer(queue)).thenReturn(mc);
+    org.mockito.Mockito.when(mc.receive({{ timeout_ms | default('50L') }})).thenReturn(tm);
+    org.mockito.Mockito.when(tm.getText()).thenReturn("{{ expected_message | default('hello') }}");
+
+    try (EmsConsumer c = new EmsConsumer(cf, "{{ queue_name | default('demo.queue') }}", {{ username | default('null') }}, {{ password | default('null') }})) {
+        String got = c.receiveText({{ timeout_ms | default('50') }});
+        org.assertj.core.api.Assertions.assertThat(got).isEqualTo("{{ expected_message | default('hello') }}");
+    }
+
+    org.mockito.Mockito.verify(conn).start();
+}

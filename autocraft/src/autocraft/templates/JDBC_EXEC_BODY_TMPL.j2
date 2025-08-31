@@ -1,0 +1,10 @@
+public static void main(String[] args) throws Exception {
+    Class.forName("{{ driver_class }}");
+    try (java.sql.Connection conn = java.sql.DriverManager.getConnection("{{ jdbc_url }}", "{{ username }}", "{{ password }}");
+         java.sql.Statement st = conn.createStatement();
+         java.sql.ResultSet rs = st.executeQuery("{{ sql }}")) {
+        while (rs.next()) {
+            System.out.println("Row: " + rs.getObject(1));
+        }
+    }
+}

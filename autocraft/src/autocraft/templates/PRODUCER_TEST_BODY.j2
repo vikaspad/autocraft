@@ -1,0 +1,22 @@
+@org.junit.jupiter.api.Test
+void {{ test_method_name | default('sends_text_message') }}() throws Exception {
+    javax.jms.ConnectionFactory cf = org.mockito.Mockito.mock(javax.jms.ConnectionFactory.class);
+    javax.jms.Connection conn = org.mockito.Mockito.mock(javax.jms.Connection.class);
+    javax.jms.Session session = org.mockito.Mockito.mock(javax.jms.Session.class);
+    javax.jms.Queue queue = org.mockito.Mockito.mock(javax.jms.Queue.class);
+    javax.jms.MessageProducer mp = org.mockito.Mockito.mock(javax.jms.MessageProducer.class);
+    javax.jms.TextMessage tm = org.mockito.Mockito.mock(javax.jms.TextMessage.class);
+
+    org.mockito.Mockito.when(cf.createConnection()).thenReturn(conn);
+    org.mockito.Mockito.when(conn.createSession(false, javax.jms.Session.AUTO_ACKNOWLEDGE)).thenReturn(session);
+    org.mockito.Mockito.when(session.createQueue("{{ queue_name | default('demo.queue') }}")).thenReturn(queue);
+    org.mockito.Mockito.when(session.createProducer(queue)).thenReturn(mp);
+    org.mockito.Mockito.when(session.createTextMessage("{{ message_text | default('hello') }}")).thenReturn(tm);
+
+    try (EmsProducer p = new EmsProducer(cf, "{{ queue_name | default('demo.queue') }}", {{ username | default('null') }}, {{ password | default('null') }})) {
+        p.sendText("{{ message_text | default('hello') }}");
+    }
+
+    org.mockito.Mockito.verify(mp).send(tm);
+    org.mockito.Mockito.verify(conn).start();
+}

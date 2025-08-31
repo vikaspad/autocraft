@@ -1,0 +1,15 @@
+@org.junit.jupiter.api.Test
+void embedded_mongo_runs() throws Exception {
+    try (de.flapdoodle.embed.mongo.MongodExecutable exec = de.flapdoodle.embed.mongo.MongodStarter.getDefaultInstance()
+            .prepare(new de.flapdoodle.embed.mongo.config.MongodConfigBuilder()
+            .version(de.flapdoodle.embed.mongo.distribution.Version.Main.V6_0)
+            .build());
+         de.flapdoodle.embed.mongo.MongodProcess proc = exec.start()) {
+        com.mongodb.client.MongoClient client = com.mongodb.client.MongoClients.create("mongodb://localhost:27017");
+        com.mongodb.client.MongoDatabase db = client.getDatabase("testdb");
+        com.mongodb.client.MongoCollection<org.bson.Document> col = db.getCollection("demo");
+        col.insertOne(new org.bson.Document("msg","hello"));
+        org.bson.Document one = col.find().first();
+        org.assertj.core.api.Assertions.assertThat(one.getString("msg")).isEqualTo("hello");
+    }
+}

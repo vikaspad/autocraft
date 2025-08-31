@@ -1,0 +1,10 @@
+// Requires dependency: {{ faker_dependency | default('com.github.javafaker:javafaker:1.0.2') }} (or net.datafaker:datafaker)
+public static void main(String[] args) {
+    {{ faker_class | default('com.github.javafaker.Faker') }} faker = new {{ faker_class | default('com.github.javafaker.Faker') }}();
+    for (int i = 0; i < {{ examples_count | default('5') }}; i++) {
+        String name = faker.name().fullName();
+        String email = faker.internet().emailAddress();
+        String city = faker.address().city();
+        System.out.println(name + " | " + email + " | " + city);
+    }
+}

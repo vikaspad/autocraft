@@ -1,0 +1,201 @@
+# Task to design the library skeleton
+design_library_skeleton:
+  description: |
+    Create repository scaffolding and module layout for a reusable Java testing library:
+      - Maven coordinates: groupId=com.example, artifactId=qa-testkit, version=0.1.0
+      - src/main/java and src/test/java structure
+      - Package base: com.example.qatestkit
+      - Add baseline dependencies (JUnit 5, AssertJ, Mockito) as optional dependencies
+      - Ensure Java 17 compatibility and surefire/jacoco config
+  expected_output: |
+    - pom.xml with dependencies and build plugins
+    - src/main/java/com/example/qatestkit/package-info.java
+    - basic .editorconfig/.gitattributes and CI-ready surefire config
+  agent: architect
+  output_file: "OUTLINE.md"
+
+# Task to generate the pom.xml snippet
+generate_pom_snippet:
+  description: |
+    Generate Maven <dependency> snippet and usage instructions for consumers to add in application pom.xml.
+    Include optional profiles for Testcontainers and WireMock.
+  expected_output: |
+    - README section "Add to your pom.xml" with <dependency> snippet
+    - Profiles for testcontainers and wiremock documented
+  agent: architect
+  context: [design_library_skeleton]
+  output_file: "docs/pom-usage.md"
+
+# Task to implement H2 support
+implement_h2_support:
+  description: |
+    Implement H2 on-the-fly utilities:
+      - H2TestSupport.java: create in-memory DB, return DataSource/JdbcTemplate
+      - SchemaRunner: apply DDL from String, classpath resource, or Flyway/Liquibase (optional)
+      - SeedLoader: insert rows via simple DSL (Map<String,Object>...), transactional
+      - Helpers for truncate/reset between tests
+      - Example JUnit 5 tests using the helpers
+  expected_output: |
+    - src/main/java/.../h2/H2TestSupport.java
+    - src/main/java/.../h2/SchemaRunner.java
+    - src/main/java/.../h2/SeedLoader.java
+    - src/test/java/.../h2/H2TestSupportTests.java
+  agent: h2_db_specialist
+  context: [design_library_skeleton]
+  output_file: "src/main/java/com/example/qatestkit/h2/H2TestSupport.java"
+
+# Task to implement MongoDB support
+implement_mongo_support:
+  description: |
+    Implement embedded/mock MongoDB utilities:
+      - MongoTestSupport.java: start embedded Mongo (flapdoodle) with version pin; fallback to Testcontainers
+      - FixtureLoader: load JSON/BSON fixtures into collections with index creation
+      - Reset/cleanup utilities; helper to get MongoClient/Database/Collection
+      - Example JUnit 5 tests with POJO codec registry
+  expected_output: |
+    - src/main/java/.../mongo/MongoTestSupport.java
+    - src/main/java/.../mongo/FixtureLoader.java
+    - src/test/java/.../mongo/MongoTestSupportTests.java
+  agent: mongo_specialist
+  context: [design_library_skeleton]
+  output_file: "src/main/java/com/example/qatestkit/mongo/MongoTestSupport.java"
+
+# Task to implement REST mocking support
+implement_rest_mock_support:
+  description: |
+    Build REST mocking helpers:
+      - RestMockSupport.java: WireMockServer lifecycle (start/stop/reset), stub builders, verify methods
+      - JsonValidations.java: JSON Schema and OpenAPI response validation helpers
+      - Request/response recording for golden files; header and auth assertion helpers
+      - Example tests stubbing GET/POST with body matchers and verifying calls
+  expected_output: |
+    - src/main/java/.../rest/RestMockSupport.java
+    - src/main/java/.../rest/JsonValidations.java
+    - src/test/java/.../rest/RestMockSupportTests.java
+  agent: rest_mock_specialist
+  context: [design_library_skeleton]
+  output_file: "src/main/java/com/example/qatestkit/rest/RestMockSupport.java"
+
+# Task to implement UI Mockito support
+implement_ui_mockito_support:
+  description: |
+    Create Mockito helpers for UI/service-layer testing (supports Angular-backed APIs via Spring controllers):
+      - UIMockitoSupport.java: common stubbing patterns, ArgumentCaptor shortcuts, spies, strict stubs
+      - DeterministicClock.java and IdGenerator.java with seeding for deterministic tests
+      - ControllerTestHelpers.java: Spring MVC controller/unit helpers w/ mock services
+      - Example tests showing controller method assertions (status, body, headers) without starting server
+  expected_output: |
+    - src/main/java/.../ui/UIMockitoSupport.java
+    - src/main/java/.../ui/DeterministicClock.java
+    - src/main/java/.../ui/IdGenerator.java
+    - src/main/java/.../ui/ControllerTestHelpers.java
+    - src/test/java/.../ui/UIMockitoSupportTests.java
+  agent: ui_mockito_specialist
+  context: [design_library_skeleton]
+  output_file: "src/main/java/com/example/qatestkit/ui/UIMockitoSupport.java"
+
+# Task to implement DB assertions
+implement_db_assertions:
+  description: |
+    Provide fluent DB assertions for relational and Mongo:
+      - DbAssert.java: row count, exists, not exists, unique, referential checks, table equals dataset
+      - JsonPathAssert.java: JSON field assertions for Mongo documents and REST responses
+      - DatasetDiff.java: compute diffs (added/removed/changed rows/docs) with pretty output
+      - Example tests covering positive/negative cases
+  expected_output: |
+    - src/main/java/.../assertions/DbAssert.java
+    - src/main/java/.../assertions/JsonPathAssert.java
+    - src/main/java/.../assertions/DatasetDiff.java
+    - src/test/java/.../assertions/DbAssertTests.java
+  agent: db_assertions_specialist
+  context: [implement_h2_support, implement_mongo_support]
+  output_file: "src/main/java/com/example/qatestkit/assertions/DbAssert.java"
+
+# Task to implement SQL Server support
+implement_sqlserver_support:
+  description: |
+    Add SQL Server Testcontainers support mirroring H2 APIs where possible:
+      - SqlServerTestSupport.java: start container, apply schema via ScriptRunner/Flyway
+      - SeedLoader reuse; connection URL/user/pass provider; cleanup/reset helpers
+      - Example tests illustrating parity with H2 helpers
+  expected_output: |
+    - src/main/java/.../sqlserver/SqlServerTestSupport.java
+    - src/test/java/.../sqlserver/SqlServerTestSupportTests.java
+  agent: sqlserver_specialist
+  context: [implement_h2_support]
+  output_file: "src/main/java/com/example/qatestkit/sqlserver/SqlServerTestSupport.java"
+
+# Task to implement extras for microservices & Angular UI integration
+implement_extras_for_microservices:
+  description: |
+    Useful extras for microservices & Angular UI integration:
+      - KafkaMockSupport.java: in-memory producer/consumer test harness, topic setup/teardown, assertion helpers
+      - OpenApiContractTest.java: validate provider/consumer payloads against OpenAPI spec (for Angular client parity)
+      - FakerBuilders.java: deterministic fake data builders for common entities (seeded)
+      - SnapshotTest.java: lightweight snapshot assertions for JSON payloads (update on explicit flag)
+  expected_output: |
+    - src/main/java/.../extras/KafkaMockSupport.java
+    - src/main/java/.../extras/OpenApiContractTest.java
+    - src/main/java/.../extras/FakerBuilders.java
+    - src/main/java/.../extras/SnapshotTest.java
+    - src/test/java/.../extras/ExtrasExamplesTests.java
+  agent: extras_specialist
+  context: [implement_rest_mock_support]
+  output_file: "src/main/java/com/example/qatestkit/extras/KafkaMockSupport.java"
+
+# Task to write usage examples and docs
+write_usage_examples_and_docs:
+  description: |
+    Produce runnable examples and documentation:
+      - Example tests: H2, Mongo, REST mock, Mockito UI, SQL Server, DB assertions, Kafka/OpenAPI
+      - README.md with quickstart, pom.xml dependency snippet, and code samples
+      - API overview and package map
+  expected_output: |
+    - examples/** with JUnit 5 tests
+    - README.md sections for each helper with code blocks
+    - docs/USAGE.md and docs/ARCHITECTURE.md
+  agent: docs_specialist
+  context:
+    - design_library_skeleton
+    - generate_pom_snippet
+    - implement_h2_support
+    - implement_mongo_support
+    - implement_rest_mock_support
+    - implement_ui_mockito_support
+    - implement_db_assertions
+    - implement_sqlserver_support
+    - implement_extras_for_microservices
+    - implement_kafka_support
+    - implement_messaging_support
+  output_file: "README.md"
+
+# --- Kafka code generation ---
+implement_kafka_messaging_support:
+  agent: kafka_messaging_specialist
+  description: >
+    Create KafkaConfig, KafkaProducerClient, KafkaConsumerClient and their unit tests
+    under package com.example.messaging.kafka using KafkaMessagingScaffoldTool.
+  expected_output: |
+    - KafkaConfig.java, KafkaProducerClient.java, KafkaConsumerClient.java
+    - KafkaProducerTest.java, KafkaConsumerTest.java
+  output_file: artifacts/kafka-messaging-summary.md
+
+# Task to implement EMS messaging support
+implement_ems_messaging_support:
+  agent: ems_messaging_specialist
+  description: >
+    Create EmsConfig, EmsProducer, EmsConsumer and their Mockito unit tests
+    under package com.example.messaging.ems using EmsMessagingScaffoldTool.
+  expected_output: |
+    - EmsConfig.java, EmsProducer.java, EmsConsumer.java
+    - EmsProducerTest.java, EmsConsumerTest.java
+  output_file: artifacts/ems-messaging-summary.md
+
+# Task to add messaging dependencies to pom.xml
+add_messaging_dependencies:
+  agent: kafka_messaging_specialist
+  description: >
+    Update pom.xml with Kafka and JMS test libs via PomXmlTool.
+    Use versions compatible with Java 17.
+  expected_output: "pom.xml updated"
+

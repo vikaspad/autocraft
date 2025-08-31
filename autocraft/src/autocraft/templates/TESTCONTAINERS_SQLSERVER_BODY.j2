@@ -1,0 +1,15 @@
+@org.junit.jupiter.api.Test
+void {{ test_method_name | default('sqlserver_container_runs') }}() throws Exception {
+    try (org.testcontainers.containers.MSSQLServerContainer<?> db =
+            new org.testcontainers.containers.MSSQLServerContainer<>("{{ image | default('mcr.microsoft.com/mssql/server:2022-latest') }}")) {
+        db.acceptLicense();
+        db.start();
+        try (java.sql.Connection conn = java.sql.DriverManager.getConnection(db.getJdbcUrl(), db.getUsername(), db.getPassword());
+             java.sql.Statement st = conn.createStatement();
+             java.sql.ResultSet rs = st.executeQuery("{{ sql_query | default('SELECT @@VERSION') }}")) {
+            rs.next();
+            String version = rs.getString(1);
+            org.assertj.core.api.Assertions.assertThat(version).contains("{{ expected_text | default('Microsoft SQL Server') }}");
+        }
+    }
+}

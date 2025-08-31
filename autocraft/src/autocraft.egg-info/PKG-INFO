@@ -1,0 +1,9 @@
+Metadata-Version: 2.4
+Name: autocraft
+Version: 0.1.0
+Requires-Python: >=3.10
+Requires-Dist: crewai==0.165.1
+Requires-Dist: crewai-tools<0.40,>=0.31
+Requires-Dist: pydantic<3,>=2
+Requires-Dist: pyyaml>=6.0
+Requires-Dist: langchain<0.3,>=0.2
